@@ -1,4 +1,5 @@
 """Define AQI breakpoints."""
+
 # required to prevent circular dependency
 from __future__ import annotations
 

@@ -1,4 +1,5 @@
 """Contains errors that can be raised by the PurpleAirApi."""
+
 from __future__ import annotations
 
 from typing import Any

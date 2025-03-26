@@ -1,4 +1,5 @@
 """The Purple Air air_quality platform."""
+
 from __future__ import annotations
 
 import logging

@@ -1,4 +1,5 @@
 """Utility functions for the v1 PurpleAir API."""
+
 from __future__ import annotations
 
 from collections import defaultdict, deque

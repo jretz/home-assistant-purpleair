@@ -1,4 +1,5 @@
 """Provides models for the PurpleAir API."""
+
 from __future__ import annotations
 
 from collections import deque

@@ -23,14 +23,12 @@ formatting:
     - pip install -r requirements.test.txt
   script:
     - codespell
-    - black --safe --check .
-    - isort -c ./custom_components/
+    - ruff check
 
 code quality:
   stage: linting
   before_script:
     - pip install -r requirements.test.txt
   script:
-    - flake8
     - pylint ./custom_components/purpleair/
     - mypy ./custom_components/purpleair/

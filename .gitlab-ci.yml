@@ -3,45 +3,24 @@ image: python:3.13
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
-cache:
-  policy: pull
-  paths:
-    - .cache/pip
-    - venv/
-  key:
-    files:
-      - setup.cfg
-      - requirements.test.txt
-
 stages:
   - linting
   - tests
 
-requirements install:
-  stage: .pre
+default:
   cache:
-    policy: pull-push
     paths:
       - .cache/pip
       - venv/
-    key:
-      files:
-        - setup.cfg
-        - requirements.test.txt
-  rules:
-    - changes:
-      - setup.cfg
-      - requirements.test.txt
-  script:
+  before_script:
     - python --version
     - python3 -m venv venv
     - source venv/bin/activate
-    - pip install -r requirements.test.txt
 
 formatting:
   stage: linting
   before_script:
-    - source venv/bin/activate
+    - pip install -r requirements.test.txt
   script:
     - codespell
     - black --safe --check .
@@ -50,7 +29,7 @@ formatting:
 code quality:
   stage: linting
   before_script:
-    - source venv/bin/activate
+    - pip install -r requirements.test.txt
   script:
     - flake8
     - pylint ./custom_components/purpleair/

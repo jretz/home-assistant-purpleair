@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from http import HTTPStatus
 import logging
 from typing import cast
@@ -161,7 +161,7 @@ class PurpleAirApiV1:
     ) -> None:
         """Map response fields to their index position."""
 
-        for key in fields.keys():
+        for key in fields:
             if key in api_fields:
                 fields[key] = api_fields.index(key)
 
@@ -212,7 +212,7 @@ def _read_sensor_data(
 
             if field in API_TIMESTAMP_VALUES:
                 value = raw_sensor[index]
-                value = datetime.fromtimestamp(value, timezone.utc) if value else None
+                value = datetime.fromtimestamp(value, UTC) if value else None
 
             if field in API_SPECIAL_VALUES:
                 special_index = raw_sensor[index]

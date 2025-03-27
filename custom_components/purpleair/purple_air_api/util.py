@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict, deque
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 import logging
 from math import fsum
 from typing import Any
@@ -33,8 +33,7 @@ WARNED_SENSORS: list[str] = []
 def add_aqi_calculations(
     pa_sensors: PurpleAirApiSensorDataDict, *, cache: EpaAvgValueCache | None = None
 ) -> None:
-    """
-    Add AQI calculations as custom properties to the readings.
+    """Add AQI calculations as custom properties to the readings.
 
     This computes the AQI values by calculating them based off the corrections
     and breakpoints, providing a few variations depending what is available.
@@ -99,8 +98,7 @@ def add_aqi_calculations(
 
 
 def apply_corrections(readings: PurpleAirApiSensorReading) -> None:
-    """
-    Apply corrections to incoming sensor data using known adjustment values.
+    """Apply corrections to incoming sensor data using known adjustment values.
 
     The sensors for temperature and humidity are known to be slightly outside of
     real values, this will apply a blanket correction of subtracting 8°F from the
@@ -130,8 +128,7 @@ def apply_corrections(readings: PurpleAirApiSensorReading) -> None:
 
 
 def build_sensors(results: list[dict[str, Any]]) -> dict[str, PurpleAirApiSensorData]:
-    """
-    Build a dictionary of PurpleAir sensors.
+    """Build a dictionary of PurpleAir sensors.
 
     The data is extracted from available data from the JSON result array returned
     from the PurpleAir API.
@@ -145,10 +142,8 @@ def build_sensors(results: list[dict[str, Any]]) -> dict[str, PurpleAirApiSensor
             sensors[pa_sensor_id] = PurpleAirApiSensorData(
                 pa_sensor_id=pa_sensor_id,
                 label=str(result.get("Label")),
-                last_seen=datetime.fromtimestamp(result["LastSeen"], timezone.utc),
-                last_update=datetime.fromtimestamp(
-                    result["LastUpdateCheck"], timezone.utc
-                ),
+                last_seen=datetime.fromtimestamp(result["LastSeen"], UTC),
+                last_update=datetime.fromtimestamp(result["LastUpdateCheck"], UTC),
                 device_location=str(result.get("DEVICE_LOCATIONTYPE", "unknown")),
                 version=str(result.get("Version", "unknown")),
                 type=str(result.get("Type", "unknown")),
@@ -171,8 +166,7 @@ def build_sensors(results: list[dict[str, Any]]) -> dict[str, PurpleAirApiSensor
 
 
 def calc_aqi(value: float, index: str) -> int | None:
-    """
-    Calculate the air quality index based off the available conversion data.
+    """Calculate the air quality index based off the available conversion data.
 
     This uses the sensors current Particulate Matter 2.5 value. Returns an AQI
     between 0 and 999 or None if the sensor reading is invalid.
@@ -198,8 +192,7 @@ def calc_aqi(value: float, index: str) -> int | None:
 
 
 def calculate_sensor_values(sensors: dict[str, PurpleAirApiSensorData]) -> None:
-    """
-    Calculate sensor values by mutating the provided sensor dictionary.
+    """Calculate sensor values by mutating the provided sensor dictionary.
 
     This iterates over the raw sensor data and provides a normalized view and adds
     any calculated properties.
@@ -293,8 +286,7 @@ def get_pm_reading(
 def warn_sensor_channel_bad(
     pa_sensor: PurpleAirApiSensorData, prop: str, channel: str
 ) -> None:
-    """
-    Log a warning if a sensor is returning bad data for a collector channel.
+    """Log a warning if a sensor is returning bad data for a collector channel.
 
     Only logs if the sensor has not already logged a warning.
     """
@@ -315,7 +307,7 @@ def _clean_expired_cache_entries(
     pa_sensor: PurpleAirApiSensorData, epa_avg: deque[EpaAvgValue]
 ) -> None:
     """Clean out any old cache entries older than an hour."""
-    hour_ago = datetime.now(tz=timezone.utc) - timedelta(seconds=3600)
+    hour_ago = datetime.now(tz=UTC) - timedelta(seconds=3600)
     expired_count = sum(1 for v in epa_avg if v.timestamp < hour_ago)
     if expired_count:
         _LOGGER.info(

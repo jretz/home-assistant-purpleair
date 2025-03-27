@@ -10,7 +10,7 @@ from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
     DataUpdateCoordinator,
 )
-from homeassistant.util import dt
+from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
 from .model import PurpleAirConfigEntry, PurpleAirDomainData
@@ -49,8 +49,10 @@ async def async_setup_entry(
     # we will expose only one AQI sensor here for future 2021.12 option flow
     entities: list[Entity] = [PurpleAirAqiSensor(config, coordinator)]
 
-    for sensor_description in SIMPLE_SENSOR_DESCRIPTIONS:
-        entities.append(PurpleAirSimpleSensor(config, coordinator, sensor_description))
+    entities.extend(
+        PurpleAirSimpleSensor(config, coordinator, sensor_description)
+        for sensor_description in SIMPLE_SENSOR_DESCRIPTIONS
+    )
 
     async_schedule_add_entities(entities, False)
 
@@ -134,7 +136,7 @@ class PurpleAirAqiSensor(PASensorBase, SensorEntity):
         if data.pm2_5_aqi_epa is None or not data.last_seen:
             return False
 
-        now = dt.utcnow()
+        now = dt_util.utcnow()
         diff = now - data.last_seen
 
         if diff.seconds > 5400:
@@ -143,7 +145,7 @@ class PurpleAirAqiSensor(PASensorBase, SensorEntity):
                     'PurpleAir Sensor "%s" (%s) has not sent data over 90 mins. Last update was %s',
                     self.pa_sensor_name,
                     self.pa_sensor_id,
-                    dt.as_local(data.last_seen),
+                    dt_util.as_local(data.last_seen),
                 )
                 self._warn_stale = True
 
@@ -160,15 +162,13 @@ class PurpleAirAqiSensor(PASensorBase, SensorEntity):
             return None
 
         # only for 3.0 base release, these will be split out after to separate entties
-        attrs = {
-            "last_seen": dt.as_local(data.last_seen) if data.last_seen else None,
+        return {
+            "last_seen": dt_util.as_local(data.last_seen) if data.last_seen else None,
             "adc": data.analog_input,
             "rssi": data.rssi,
             "status": data.pm2_5_aqi_epa_status,
             "uptime": data.uptime,
         }
-
-        return attrs
 
     @property
     def native_value(self) -> int | None:

@@ -10,7 +10,7 @@ from types import MappingProxyType
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import entity_registry
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
@@ -128,7 +128,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
 
     # remove air_quality entities from the registry if they exist
-    ent_reg = entity_registry.async_get(hass)
+    ent_reg = er.async_get(hass)
     unique_id = f"{config_entry.unique_id}_air_quality"
     if entity_id := ent_reg.async_get_entity_id("air_quality", DOMAIN, unique_id):
         _LOGGER.debug("Removing deprecated air_quality entity %s", entity_id)
@@ -148,7 +148,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    unload_ok = all(
+    return all(
         await asyncio.gather(
             *[
                 hass.config_entries.async_forward_entry_unload(entry, component)
@@ -156,8 +156,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             ]
         )
     )
-
-    return unload_ok
 
 
 async def async_remove_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> None:

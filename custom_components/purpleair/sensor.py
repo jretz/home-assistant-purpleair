@@ -7,13 +7,13 @@ from typing import TYPE_CHECKING
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import device_registry
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
     DataUpdateCoordinator,
 )
-from homeassistant.util import dt
+from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN, SENSOR_TYPES
 from .model import (
@@ -59,7 +59,7 @@ def _add_legacy_sensors(
     config: PurpleAirConfigEntry,
     coordinator: DataUpdateCoordinator[dict[str, PurpleAirApiSensorData]],
 ) -> list[PurpleAirSensor]:
-    dev_registry = device_registry.async_get(hass)
+    dev_registry = dr.async_get(hass)
     device = dev_registry.async_get_device({(DOMAIN, config.pa_sensor_id)})
 
     if not device or device.model == "unknown":
@@ -96,10 +96,10 @@ def _add_legacy_sensors(
 
         unregister = coordinator.async_add_listener(callback)
 
-    pa_sensors: list[PurpleAirSensor] = []
-
-    for description in SENSOR_TYPES:
-        pa_sensors.append(PurpleAirSensor(config, description, coordinator))
+    pa_sensors: list[PurpleAirSensor] = [
+        PurpleAirSensor(config, description, coordinator)
+        for description in SENSOR_TYPES
+    ]
 
     return pa_sensors
 
@@ -130,6 +130,7 @@ class PurpleAirSensor(
               Sensor entity description describing configuration parameters.
           coordinator:
               Coordinator controlling this sensor.
+
         """
         super().__init__(coordinator)
 
@@ -154,7 +155,7 @@ class PurpleAirSensor(
         if not (pa_sensor := self._get_sensor_data()):
             return False
 
-        now = dt.utcnow()
+        now = dt_util.utcnow()
         diff = now - pa_sensor.last_update
 
         if diff.seconds > 5400:
@@ -163,7 +164,7 @@ class PurpleAirSensor(
                     'PurpleAir Sensor "%s" (%s) has not sent data over 90 mins. Last update was %s',
                     self.config.title,
                     self.pa_sensor_id,
-                    dt.as_local(pa_sensor.last_update),
+                    dt_util.as_local(pa_sensor.last_update),
                 )
                 self._warn_stale = True
 
@@ -209,8 +210,8 @@ class PurpleAirSensor(
             return None
 
         attrs = {
-            "last_seen": dt.as_local(pa_sensor.last_seen),
-            "last_update": dt.as_local(pa_sensor.last_update),
+            "last_seen": dt_util.as_local(pa_sensor.last_seen),
+            "last_update": dt_util.as_local(pa_sensor.last_update),
             "device_location": pa_sensor.device_location,
             "adc": pa_sensor.adc,
             "rssi": pa_sensor.rssi,

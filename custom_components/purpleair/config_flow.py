@@ -10,7 +10,7 @@ import voluptuous as vol
 
 from homeassistant.config_entries import CONN_CLASS_CLOUD_POLL, HANDLERS, ConfigFlow
 from homeassistant.const import CONF_API_KEY, CONF_ID
-from homeassistant.helpers import config_validation
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import DOMAIN
@@ -133,7 +133,9 @@ class PurpleAirConfigFlow(ConfigFlow):
 
         return self.async_abort(reason="unrecognized_reauth")
 
-    async def async_step_legacy_migrate(self, user_input: None = None) -> ConfigFlowResult:
+    async def async_step_legacy_migrate(
+        self, user_input: None = None
+    ) -> ConfigFlowResult:
         """Handle legacy migration steps for the sensor."""
 
         # we don't use user_input in this method, but it's part of the signature
@@ -267,9 +269,9 @@ class PurpleAirConfigFlow(ConfigFlow):
                 self._session = async_get_clientsession(self.hass)
 
             vol_step = "api_key"
-            api_key = config_validation.string(user_input.get(CONF_API_KEY))
+            api_key = cv.string(user_input.get(CONF_API_KEY))
             vol_step = "id"
-            pa_sensor_id = config_validation.string(user_input.get(CONF_ID))
+            pa_sensor_id = cv.string(user_input.get(CONF_ID))
             pa_sensor_read_key = user_input.get(CONF_PA_SENSOR_READ_KEY)
 
             pa_sensor = await get_api_sensor_config(
@@ -284,9 +286,6 @@ class PurpleAirConfigFlow(ConfigFlow):
                 api_key=api_key,
                 api_version=1,
             )
-
-            _LOGGER.debug("got configuration: %s", config)
-            return (config, errors)
         except vol.Invalid:
             errors[vol_step] = f"{vol_step}_missing"
         except PurpleAirApiConfigError as error:
@@ -304,6 +303,9 @@ class PurpleAirConfigFlow(ConfigFlow):
                 exc_info=error,
             )
             errors["base"] = "unknown"
+        else:
+            _LOGGER.debug("got configuration: %s", config)
+            return (config, errors)
 
         return (None, errors)
 
@@ -355,6 +357,7 @@ def vol_data_dict(*args: Any) -> dict[str, Any]:
     ...
     >>> type(d["other_value"])
     <class 'voluptuous.schema_builder.Undefined'>
+
     """
     return defaultdict(
         lambda: vol.UNDEFINED,

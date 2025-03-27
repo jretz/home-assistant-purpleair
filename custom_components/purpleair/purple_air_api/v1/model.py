@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import logging
 from typing import Literal, TypedDict
 
@@ -16,11 +16,9 @@ SENSOR_READING_ADDITIONAL_ATTRIBUTES = [
     "pm2_5_aqi_epa_status",
 ]
 
-SensorReadingAdditionalAttrsType = (
-    Literal["pm2_5_aqi_instant"]
-    | Literal["pm2_5_aqi_epa"]
-    | Literal["pm2_5_aqi_epa_status"]
-)
+SensorReadingAdditionalAttrsType = Literal[
+    "pm2_5_aqi_instant", "pm2_5_aqi_epa", "pm2_5_aqi_epa_status"
+]
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,6 +32,7 @@ class AqiBreakpoint:
         pm_high  -- The high end of particulate matter in ugm3
         aqi_low  -- The low end of the calculated AQI
         aqi_high -- The high end of the calculated AQI
+
     """
 
     pm_low: float
@@ -51,6 +50,7 @@ class ApiConfigEntry:
       name: Name of the sensor.
       hidden: Flag indicating whether the sensor is private or public.
       read_key: Sensor read key used when retrieving data from a hidden sensor.
+
     """
 
     pa_sensor_id: str
@@ -74,7 +74,7 @@ class DeviceReading:
     location_type: str | None = None
     private: bool | None = None
 
-    def set_value(self, name: str, value: int | float | str | datetime | None) -> None:
+    def set_value(self, name: str, value: float | str | datetime | None) -> None:
         """Set the field to the provided value, if it exists."""
 
         # sanity check the field names match known values first.
@@ -101,11 +101,12 @@ class EpaAvgValue:
         hum  -- List of last humidity readings
         pm25 -- List of last PM2.5 CF=1 readings
         timestamp -- Date the value reading was created
+
     """
 
     hum: float
     pm25: float
-    timestamp: datetime = field(default_factory=lambda: datetime.now(tz=timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
 
 
 EpaAvgValueCache = dict[str, deque[EpaAvgValue]]
@@ -146,7 +147,7 @@ class SensorReading:
     pm2_5_aqi_epa: int | None = None
     pm2_5_aqi_epa_status: str | None = None
 
-    def set_value(self, name: str, value: int | float | str | datetime | None) -> None:
+    def set_value(self, name: str, value: float | str | datetime | None) -> None:
         """Set the field to the provided value, if it exists."""
 
         # sanity check the field names match known values first.

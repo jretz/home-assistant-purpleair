@@ -7,10 +7,10 @@ from datetime import datetime
 import logging
 from typing import TYPE_CHECKING, Any, Protocol
 
-from homeassistant.helpers import device_registry
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from homeassistant.util.dt import utcnow
+import homeassistant.util.dt as dt_util
 
 from .const import DOMAIN
 from .purple_air_api.v1.exceptions import PurpleAirApiDataError, PurpleAirServerApiError
@@ -132,7 +132,7 @@ class PurpleAirDataUpdateCoordinator(
             raise UpdateFailed(str(err)) from err
 
         if [s["device"] for s in data.values() if s["device"]]:
-            self._last_device_refresh = utcnow()
+            self._last_device_refresh = dt_util.utcnow()
 
             devices: dict[str, DeviceReading] = {}
             for pa_sensor_id, api_data in data.items():
@@ -153,7 +153,7 @@ class PurpleAirDataUpdateCoordinator(
         if not self._last_device_refresh:
             return True
 
-        diff = utcnow() - self._last_device_refresh
+        diff = dt_util.utcnow() - self._last_device_refresh
         return diff.days >= 1
 
     @property
@@ -178,7 +178,7 @@ class PurpleAirDataUpdateCoordinator(
 
             return None
 
-        registry = device_registry.async_get(self.hass)
+        registry = dr.async_get(self.hass)
 
         for pa_sensor_id, device_data in devices.items():
             config_entry = find_entry(pa_sensor_id)

@@ -99,8 +99,7 @@ class PurpleAirApi:
     def _build_api_urls(
         self, public_sensors: list[str], private_sensors: list[str]
     ) -> list[str]:
-        """
-        Build a list of URLs to query the PurpleAir JSON API.
+        """Build a list of URLs to query the PurpleAir JSON API.
 
         This is based off the provided public and private sensor lists, attempting
         to combine as many sensors in to as few API requests as possible.
@@ -172,8 +171,7 @@ class PurpleAirApi:
 async def get_sensor_configuration(
     session: ClientSession, url: str
 ) -> PurpleAirApiConfigEntry:
-    """
-    Get a configuration for the sensor at the given PurpleAir URL.
+    """Get a configuration for the sensor at the given PurpleAir URL.
 
     This string expects to see a URL in the following format:
 

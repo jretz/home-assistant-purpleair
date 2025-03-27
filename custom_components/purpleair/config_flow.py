@@ -21,7 +21,7 @@ from .purple_air_api.v1.util import get_api_sensor_config
 if TYPE_CHECKING:
     from aiohttp import ClientSession
 
-    from homeassistant.data_entry_flow import FlowResult
+    from homeassistant.config_entries import ConfigFlowResult
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class PurpleAirConfigFlow(ConfigFlow):
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle setup user flow."""
 
         # if we find an existing API key, send them to the "add_sensor" flow instead.
@@ -88,7 +88,7 @@ class PurpleAirConfigFlow(ConfigFlow):
 
     async def async_step_add_sensor(
         self, user_input: UserInputSensorConfig | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle adding another PA sensor with existing API key."""
 
         errors: dict[str, str] = {}
@@ -117,7 +117,7 @@ class PurpleAirConfigFlow(ConfigFlow):
             step_id="add_sensor", data_schema=data_schema, errors=errors
         )
 
-    async def async_step_reauth(self, config_data: dict[str, Any]) -> FlowResult:
+    async def async_step_reauth(self, config_data: dict[str, Any]) -> ConfigFlowResult:
         """Handle reauthentication requests for PurpleAir sensors.
 
         The only method currently supported is handling migrations from legacy v0
@@ -133,7 +133,7 @@ class PurpleAirConfigFlow(ConfigFlow):
 
         return self.async_abort(reason="unrecognized_reauth")
 
-    async def async_step_legacy_migrate(self, user_input: None = None) -> FlowResult:
+    async def async_step_legacy_migrate(self, user_input: None = None) -> ConfigFlowResult:
         """Handle legacy migration steps for the sensor."""
 
         # we don't use user_input in this method, but it's part of the signature
@@ -148,7 +148,7 @@ class PurpleAirConfigFlow(ConfigFlow):
 
     async def async_step_legacy_migrate_auto(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Automatically migrate the sensor if the user accepts."""
         if user_input is None:
             return self.async_show_form(
@@ -159,7 +159,7 @@ class PurpleAirConfigFlow(ConfigFlow):
 
     async def async_step_legacy_migrate_with_api_key(
         self, user_input: UserInputSensorConfig | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Attempt to automatically migrate the sensor, if we can.
 
         Otherwise show the user some configuration steps and hints.
@@ -209,7 +209,7 @@ class PurpleAirConfigFlow(ConfigFlow):
 
     async def async_step_legacy_migrate_without_api_key(
         self, user_input: UserInputSensorConfig | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Inform the user they need to get an API key to migrate sensors."""
 
         config = self._old_config
@@ -309,7 +309,7 @@ class PurpleAirConfigFlow(ConfigFlow):
 
     async def _migrate_legacy_config(
         self, new_config: PurpleAirConfigEntry
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Update the existing config entry with the new config entry."""
 
         existing_entry = await self.async_set_unique_id(new_config.get_uniqueid())

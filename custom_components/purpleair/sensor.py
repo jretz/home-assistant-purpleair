@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry
-from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
@@ -23,6 +23,9 @@ from .model import (
 )
 from .purple_air_api.model import PurpleAirApiSensorData, PurpleAirApiSensorReading
 from .sensor_v1 import async_setup_entry as async_setup_entry_v1
+
+if TYPE_CHECKING:
+    from homeassistant.helpers.device_registry import DeviceInfo
 
 PARALLEL_UPDATES = 1
 

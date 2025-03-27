@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Literal, TypedDict
 
@@ -105,7 +105,7 @@ class EpaAvgValue:
 
     hum: float
     pm25: float
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(tz=timezone.utc))
 
 
 EpaAvgValueCache = dict[str, deque[EpaAvgValue]]

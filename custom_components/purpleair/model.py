@@ -84,7 +84,7 @@ class PurpleAirDomainData:
     expected_entries_v1: int = 0
 
 
-@dataclass
+@dataclass(frozen=True)
 class PurpleAirSensorEntityDescription(SensorEntityDescription):
     """Class describing PurpleAir sensor entities."""
 

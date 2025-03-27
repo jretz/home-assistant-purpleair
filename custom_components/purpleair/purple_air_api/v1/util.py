@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict, deque
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 import logging
 from math import fsum
@@ -288,7 +288,7 @@ def _clean_expired_cache_entries(
     pa_sensor: SensorReading, epa_avg: deque[EpaAvgValue]
 ) -> None:
     """Clean out any old cache entries older than an hour."""
-    hour_ago = datetime.utcnow() - timedelta(seconds=3600)
+    hour_ago = datetime.now(tz=timezone.utc) - timedelta(seconds=3600)
     expired_count = sum(1 for v in epa_avg if v.timestamp < hour_ago)
     if expired_count:
         _LOGGER.info(

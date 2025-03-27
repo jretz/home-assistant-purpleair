@@ -136,7 +136,7 @@ class PurpleAirApiV1:
             raw_data: ApiResponse = await resp.json()
 
             if not resp.ok:
-                error_data = cast(ApiErrorResponse, raw_data)
+                error_data = cast("ApiErrorResponse", raw_data)
                 reason = str(resp.reason) if resp.reason else "Unknown"
                 raise PurpleAirApiDataError(
                     resp.status,
@@ -147,7 +147,7 @@ class PurpleAirApiV1:
 
         _LOGGER.debug("raw data: %s", raw_data)
 
-        data = cast(ApiSensorResponse, raw_data)
+        data = cast("ApiSensorResponse", raw_data)
         self._update_fields_position(fields, data["fields"])
         sensor_data = _read_sensor_data(fields, data, do_device_update)
         apply_sensor_corrections(sensor_data)

@@ -1,6 +1,6 @@
 """Exceptions for the v1 PurpleAir API."""
 
-from purple_air_api.exceptions import PurpleAirApiError
+from ..exceptions import PurpleAirApiError  # noqa: TID252
 
 
 class PurpleAirApiConfigError(PurpleAirApiError):

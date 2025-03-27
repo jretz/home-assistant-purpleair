@@ -23,7 +23,7 @@ formatting:
     - pip install -r requirements.test.txt
   script:
     - codespell
-    - ruff check
+    - ruff format --check
 
 code quality:
   stage: linting
@@ -32,3 +32,4 @@ code quality:
   script:
     - pylint ./custom_components/purpleair/
     - mypy ./custom_components/purpleair/
+    - ruff check

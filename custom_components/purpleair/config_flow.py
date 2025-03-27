@@ -62,7 +62,7 @@ class PurpleAirConfigFlow(ConfigFlow):
         errors: dict[str, str] = {}
         if user_input is not None:
             (config, errors) = await self._get_sensor_config(
-                cast(UserInputSensorConfig, user_input)
+                cast("UserInputSensorConfig", user_input)
             )
 
             if config and not errors:
@@ -93,7 +93,7 @@ class PurpleAirConfigFlow(ConfigFlow):
 
         errors: dict[str, str] = {}
         if user_input:
-            updated_input = cast(UserInputSensorConfig, dict(user_input))
+            updated_input = cast("UserInputSensorConfig", dict(user_input))
             updated_input["api_key"] = self._api_key
             (config, errors) = await self._get_sensor_config(updated_input)
 

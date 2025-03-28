@@ -1,6 +1,12 @@
 # Releases
 
-Current release: **3.2.2**
+Current release: **3.2.3**
+
+## 3.2.3
+
+Fix for HA 2025.4 deprecation of `async_add_job`.
+
+Brought coding standards up to match HA 2025.3.4 configurations.
 
 ## 3.2.2
 

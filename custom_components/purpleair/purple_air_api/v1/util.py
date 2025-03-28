@@ -1,8 +1,9 @@
 """Utility functions for the v1 PurpleAir API."""
+
 from __future__ import annotations
 
 from collections import defaultdict, deque
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from http import HTTPStatus
 import logging
 from math import fsum
@@ -26,8 +27,7 @@ _LOGGER = logging.getLogger(__name__)
 def add_aqi_calculations(
     sensors: dict[str, NormalizedApiData], *, cache: EpaAvgValueCache
 ) -> None:
-    """
-    Add AQI calculations as custom properties to the readings.
+    """Add AQI calculations as custom properties to the readings.
 
     This computes the AQI values by calculating them based off the corrections
     and breakpoints, providing a few variations depending what is available.
@@ -86,8 +86,7 @@ def add_aqi_calculations(
 
 
 def apply_sensor_corrections(sensors: dict[str, NormalizedApiData]) -> None:
-    """
-    Apply corrections to incoming sensor data using known adjustment values.
+    """Apply corrections to incoming sensor data using known adjustment values.
 
     The sensors for temperature and humidity are known to be slightly outside of
     real values, this will apply a blanket correction of subtracting 8°F from the
@@ -121,8 +120,7 @@ def apply_sensor_corrections(sensors: dict[str, NormalizedApiData]) -> None:
 
 
 def calc_aqi(value: float, index: str) -> int | None:
-    """
-    Calculate the air quality index based off the available conversion data.
+    """Calculate the air quality index based off the available conversion data.
 
     This uses the sensors current Particulate Matter 2.5 value. Returns an AQI
     between 0 and 999 or None if the sensor reading is invalid.
@@ -159,8 +157,7 @@ async def get_api_sensor_config(
     pa_sensor_id: str,
     pa_sensor_read_key: str | None = None,
 ) -> ApiConfigEntry:
-    """
-    Get a new configuration for the sensor with the provided information.
+    """Get a new configuration for the sensor with the provided information.
 
     Provide your PurpleAir API READ key in `api_key` and the sensor to configure
     via `pa_sensor_id`. If the sensor is private (hidden) a read key must be
@@ -287,7 +284,7 @@ def _clean_expired_cache_entries(
     pa_sensor: SensorReading, epa_avg: deque[EpaAvgValue]
 ) -> None:
     """Clean out any old cache entries older than an hour."""
-    hour_ago = datetime.utcnow() - timedelta(seconds=3600)
+    hour_ago = datetime.now(tz=UTC) - timedelta(seconds=3600)
     expired_count = sum(1 for v in epa_avg if v.timestamp < hour_ago)
     if expired_count:
         _LOGGER.info(

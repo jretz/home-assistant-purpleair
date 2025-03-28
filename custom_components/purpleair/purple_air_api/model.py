@@ -1,9 +1,10 @@
 """Provides models for the PurpleAir API."""
+
 from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 @dataclass
@@ -15,6 +16,7 @@ class PurpleAirApiConfigEntry:
         title        -- The title of the sensor
         hidden       -- Flag indicating whether the sensor is private or public
         key          -- Key used when retrieving sensor data. Must be provided if hidden is True.
+
     """
 
     pa_sensor_id: str
@@ -55,6 +57,7 @@ class PurpleAirApiSensorReading:
           Can be one of: good, questionable, single, invalid.
       status:
           Status calculations for EPA AQI sensors
+
     """
 
     # sensor data
@@ -89,8 +92,7 @@ class PurpleAirApiSensorReading:
         self.channels.clear()
 
     def get_channel(self, channel: str) -> dict[str, float]:
-        """
-        Get the internal channel readings dictionary for channel A or B.
+        """Get the internal channel readings dictionary for channel A or B.
 
         Raises an AttributeError if the channel is not in the set('A', 'B').
         """
@@ -124,11 +126,10 @@ class PurpleAirApiSensorReading:
     def set_value(
         self,
         attr: str,
-        value: int | float | None,
+        value: float | None,
         confidence: str | None = None,
     ) -> None:
-        """
-        Set the computed value for the given sensor.
+        """Set the computed value for the given sensor.
 
         The attribute is an optional value with an optional confidence rating.
         An AttributeError is raised if the attribute name does not exist.
@@ -137,6 +138,7 @@ class PurpleAirApiSensorReading:
           attr: Attribute to set.
           value: Value to set for the attribute.
           confidence: Confidence string for the value.
+
         """
 
         if not hasattr(self, attr):
@@ -165,6 +167,7 @@ class PurpleAirApiSensorData:
         rssi            -- Current reported RSSI WiFi signal strength.
         adc             -- Current reported ADC voltage of the sensor.
         uptime          -- Current uptime reported by the sensor.
+
     """
 
     pa_sensor_id: str
@@ -193,6 +196,7 @@ class AqiBreakpoint:
         pm_high  -- The high end of particulate matter in ugm3
         aqi_low  -- The low end of the calculated AQI
         aqi_high -- The high end of the calculated AQI
+
     """
 
     pm_low: float
@@ -209,11 +213,12 @@ class EpaAvgValue:
         hum  -- List of last humidity readings
         pm25 -- List of last PM2.5 CF=1 readings
         timestamp -- Date the value reading was created
+
     """
 
     hum: float
     pm25: float
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
 
 
 EpaAvgValueCache = dict[str, deque[EpaAvgValue]]

@@ -18,7 +18,7 @@ from homeassistant.const import (
 )
 
 
-@dataclass
+@dataclass(frozen=True)
 class PASensorDescription(SensorEntityDescription):
     """Extra properties."""
 
@@ -26,7 +26,7 @@ class PASensorDescription(SensorEntityDescription):
 
 
 AqiSensorDescription = PASensorDescription(
-    "air_quality_index",
+    key="air_quality_index",
     name="Air Quality Index",
     icon="mdi:weather-hazy",
     device_class=SensorDeviceClass.AQI,
@@ -37,7 +37,7 @@ AqiSensorDescription = PASensorDescription(
 
 SIMPLE_SENSOR_DESCRIPTIONS: Final = [
     PASensorDescription(
-        "aqi_raw",
+        key="aqi_raw",
         name="Air Quality Index (Raw)",
         icon="mdi:weather-hazy",
         device_class=SensorDeviceClass.AQI,
@@ -47,7 +47,7 @@ SIMPLE_SENSOR_DESCRIPTIONS: Final = [
         attr_name="pm2_5_aqi_instant",
     ),
     PASensorDescription(
-        "pm25",
+        key="pm25",
         name="PM 2.5",
         icon="mdi:blur",
         device_class=SensorDeviceClass.PM25,
@@ -57,7 +57,7 @@ SIMPLE_SENSOR_DESCRIPTIONS: Final = [
         attr_name="pm2_5_atm",
     ),
     PASensorDescription(
-        "pm1",
+        key="pm1",
         name="PM 1.0",
         icon="mdi:blur",
         device_class=SensorDeviceClass.PM1,
@@ -67,7 +67,7 @@ SIMPLE_SENSOR_DESCRIPTIONS: Final = [
         attr_name="pm1_0_atm",
     ),
     PASensorDescription(
-        "pm10",
+        key="pm10",
         name="PM 10.0",
         icon="mdi:blur",
         device_class=SensorDeviceClass.PM10,
@@ -77,7 +77,7 @@ SIMPLE_SENSOR_DESCRIPTIONS: Final = [
         attr_name="pm10_0_atm",
     ),
     PASensorDescription(
-        "humidity",
+        key="humidity",
         name="Humidity",
         icon="mdi:water-percent",
         device_class=SensorDeviceClass.HUMIDITY,
@@ -87,7 +87,7 @@ SIMPLE_SENSOR_DESCRIPTIONS: Final = [
         attr_name="humidity",
     ),
     PASensorDescription(
-        "temp",
+        key="temp",
         name="Temperature",
         icon="mdi:thermometer",
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -97,7 +97,7 @@ SIMPLE_SENSOR_DESCRIPTIONS: Final = [
         attr_name="temperature",
     ),
     PASensorDescription(
-        "pressure",
+        key="pressure",
         name="Pressure",
         icon="mdi:gauge",
         device_class=SensorDeviceClass.PRESSURE,

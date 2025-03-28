@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from http import HTTPStatus
 import logging
 from typing import cast
@@ -136,7 +136,7 @@ class PurpleAirApiV1:
             raw_data: ApiResponse = await resp.json()
 
             if not resp.ok:
-                error_data = cast(ApiErrorResponse, raw_data)
+                error_data = cast("ApiErrorResponse", raw_data)
                 reason = str(resp.reason) if resp.reason else "Unknown"
                 raise PurpleAirApiDataError(
                     resp.status,
@@ -147,7 +147,7 @@ class PurpleAirApiV1:
 
         _LOGGER.debug("raw data: %s", raw_data)
 
-        data = cast(ApiSensorResponse, raw_data)
+        data = cast("ApiSensorResponse", raw_data)
         self._update_fields_position(fields, data["fields"])
         sensor_data = _read_sensor_data(fields, data, do_device_update)
         apply_sensor_corrections(sensor_data)
@@ -161,7 +161,7 @@ class PurpleAirApiV1:
     ) -> None:
         """Map response fields to their index position."""
 
-        for key in fields.keys():
+        for key in fields:
             if key in api_fields:
                 fields[key] = api_fields.index(key)
 
@@ -212,7 +212,7 @@ def _read_sensor_data(
 
             if field in API_TIMESTAMP_VALUES:
                 value = raw_sensor[index]
-                value = datetime.fromtimestamp(value, timezone.utc) if value else None
+                value = datetime.fromtimestamp(value, UTC) if value else None
 
             if field in API_SPECIAL_VALUES:
                 special_index = raw_sensor[index]

@@ -1,6 +1,6 @@
 """Exceptions for the v1 PurpleAir API."""
 
-from ..exceptions import PurpleAirApiError
+from ..exceptions import PurpleAirApiError  # noqa: TID252
 
 
 class PurpleAirApiConfigError(PurpleAirApiError):
@@ -10,6 +10,7 @@ class PurpleAirApiConfigError(PurpleAirApiError):
       extra   -- Extra info about the error
       param   -- The parameter that failed validation
       message -- An explanation of the error.
+
     """
 
     def __init__(self, param: str, extra: str | None = None) -> None:
@@ -30,6 +31,7 @@ class PurpleAirServerApiError(PurpleAirApiError):
         5xx is a server (their) error, but 503 may be transient, etc)
       reason
         The reason phrase given by the server, if one is available.
+
     """
 
     def __init__(self, status: int, reason: str) -> None:
@@ -51,6 +53,7 @@ class PurpleAirApiDataError(PurpleAirApiError):
         The error description given for the error, if available.
       error:
         The attribute(s) the error may apply to, if available.
+
     """
 
     def __init__(self, status: int, reason: str, description: str, error: str) -> None:

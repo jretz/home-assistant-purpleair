@@ -1,4 +1,5 @@
 """Contains errors that can be raised by the PurpleAirApi."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -9,6 +10,7 @@ class PurpleAirApiError(Exception):
 
     Attributes:
         message -- An explanation of the error.
+
     """
 
     def __init__(self, message: str) -> None:
@@ -27,6 +29,7 @@ class PurpleAirApiInvalidResponseError(PurpleAirApiError):
     Attributes:
       message -- An explanation of the error.
       data    -- Data returned from the API call that could not be recognized.
+
     """
 
     def __init__(self, message: str, data: Any) -> None:
@@ -44,6 +47,7 @@ class PurpleAirApiStatusError(PurpleAirApiError):
         url     -- The URL that caused the error.
         status  -- Status code returned from the server.
         text    -- Any data returned in the body of the error from the server.
+
     """
 
     def __init__(self, url: str, status: int, text: str) -> None:
@@ -63,6 +67,7 @@ class PurpleAirApiUrlError(PurpleAirApiError):
     Attributes:
         message -- An explanation of the error.
         url     -- The URL that is considered invalid.
+
     """
 
     def __init__(self, message: str, url: str) -> None:

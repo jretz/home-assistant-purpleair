@@ -10,7 +10,7 @@ import voluptuous as vol
 
 from homeassistant.config_entries import CONN_CLASS_CLOUD_POLL, HANDLERS, ConfigFlow
 from homeassistant.const import CONF_API_KEY, CONF_ID
-from homeassistant.helpers import config_validation
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import DOMAIN
@@ -21,7 +21,7 @@ from .purple_air_api.v1.util import get_api_sensor_config
 if TYPE_CHECKING:
     from aiohttp import ClientSession
 
-    from homeassistant.data_entry_flow import FlowResult
+    from homeassistant.config_entries import ConfigFlowResult
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class PurpleAirConfigFlow(ConfigFlow):
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle setup user flow."""
 
         # if we find an existing API key, send them to the "add_sensor" flow instead.
@@ -62,7 +62,7 @@ class PurpleAirConfigFlow(ConfigFlow):
         errors: dict[str, str] = {}
         if user_input is not None:
             (config, errors) = await self._get_sensor_config(
-                cast(UserInputSensorConfig, user_input)
+                cast("UserInputSensorConfig", user_input)
             )
 
             if config and not errors:
@@ -88,12 +88,12 @@ class PurpleAirConfigFlow(ConfigFlow):
 
     async def async_step_add_sensor(
         self, user_input: UserInputSensorConfig | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle adding another PA sensor with existing API key."""
 
         errors: dict[str, str] = {}
         if user_input:
-            updated_input = cast(UserInputSensorConfig, dict(user_input))
+            updated_input = cast("UserInputSensorConfig", dict(user_input))
             updated_input["api_key"] = self._api_key
             (config, errors) = await self._get_sensor_config(updated_input)
 
@@ -117,7 +117,7 @@ class PurpleAirConfigFlow(ConfigFlow):
             step_id="add_sensor", data_schema=data_schema, errors=errors
         )
 
-    async def async_step_reauth(self, config_data: dict[str, Any]) -> FlowResult:
+    async def async_step_reauth(self, config_data: dict[str, Any]) -> ConfigFlowResult:
         """Handle reauthentication requests for PurpleAir sensors.
 
         The only method currently supported is handling migrations from legacy v0
@@ -133,7 +133,9 @@ class PurpleAirConfigFlow(ConfigFlow):
 
         return self.async_abort(reason="unrecognized_reauth")
 
-    async def async_step_legacy_migrate(self, user_input: None = None) -> FlowResult:
+    async def async_step_legacy_migrate(
+        self, user_input: None = None
+    ) -> ConfigFlowResult:
         """Handle legacy migration steps for the sensor."""
 
         # we don't use user_input in this method, but it's part of the signature
@@ -148,7 +150,7 @@ class PurpleAirConfigFlow(ConfigFlow):
 
     async def async_step_legacy_migrate_auto(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Automatically migrate the sensor if the user accepts."""
         if user_input is None:
             return self.async_show_form(
@@ -159,7 +161,7 @@ class PurpleAirConfigFlow(ConfigFlow):
 
     async def async_step_legacy_migrate_with_api_key(
         self, user_input: UserInputSensorConfig | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Attempt to automatically migrate the sensor, if we can.
 
         Otherwise show the user some configuration steps and hints.
@@ -209,7 +211,7 @@ class PurpleAirConfigFlow(ConfigFlow):
 
     async def async_step_legacy_migrate_without_api_key(
         self, user_input: UserInputSensorConfig | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Inform the user they need to get an API key to migrate sensors."""
 
         config = self._old_config
@@ -267,9 +269,9 @@ class PurpleAirConfigFlow(ConfigFlow):
                 self._session = async_get_clientsession(self.hass)
 
             vol_step = "api_key"
-            api_key = config_validation.string(user_input.get(CONF_API_KEY))
+            api_key = cv.string(user_input.get(CONF_API_KEY))
             vol_step = "id"
-            pa_sensor_id = config_validation.string(user_input.get(CONF_ID))
+            pa_sensor_id = cv.string(user_input.get(CONF_ID))
             pa_sensor_read_key = user_input.get(CONF_PA_SENSOR_READ_KEY)
 
             pa_sensor = await get_api_sensor_config(
@@ -284,9 +286,6 @@ class PurpleAirConfigFlow(ConfigFlow):
                 api_key=api_key,
                 api_version=1,
             )
-
-            _LOGGER.debug("got configuration: %s", config)
-            return (config, errors)
         except vol.Invalid:
             errors[vol_step] = f"{vol_step}_missing"
         except PurpleAirApiConfigError as error:
@@ -304,12 +303,15 @@ class PurpleAirConfigFlow(ConfigFlow):
                 exc_info=error,
             )
             errors["base"] = "unknown"
+        else:
+            _LOGGER.debug("got configuration: %s", config)
+            return (config, errors)
 
         return (None, errors)
 
     async def _migrate_legacy_config(
         self, new_config: PurpleAirConfigEntry
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Update the existing config entry with the new config entry."""
 
         existing_entry = await self.async_set_unique_id(new_config.get_uniqueid())
@@ -355,6 +357,7 @@ def vol_data_dict(*args: Any) -> dict[str, Any]:
     ...
     >>> type(d["other_value"])
     <class 'voluptuous.schema_builder.Undefined'>
+
     """
     return defaultdict(
         lambda: vol.UNDEFINED,

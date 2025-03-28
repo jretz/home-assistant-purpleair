@@ -1,4 +1,5 @@
 """Typing definitions for PurpleAir integration."""
+
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
@@ -32,6 +33,7 @@ class PurpleAirConfigEntry:
     - api_key (str):
           Api key used to access the API for this sensor.
           Required if api_version >= 1.
+
     """
 
     pa_sensor_id: str
@@ -74,6 +76,7 @@ class PurpleAirDomainData:
           number of queries to the API. Set to zero after startup is complete.
     - expected_entries_v1 (int=0):
           The number of expected v1 API entries to see on startup.
+
     """
 
     api: PurpleAirApi | None = None
@@ -83,7 +86,7 @@ class PurpleAirDomainData:
     expected_entries_v1: int = 0
 
 
-@dataclass
+@dataclass(frozen=True)
 class PurpleAirSensorEntityDescription(SensorEntityDescription):
     """Class describing PurpleAir sensor entities."""
 

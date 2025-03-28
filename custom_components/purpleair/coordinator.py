@@ -7,9 +7,10 @@ from datetime import datetime
 import logging
 from typing import TYPE_CHECKING, Any, Protocol
 
-from homeassistant.helpers import device_registry
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+import homeassistant.util.dt as dt_util
 
 from .const import DOMAIN
 from .purple_air_api.v1.exceptions import PurpleAirApiDataError, PurpleAirServerApiError
@@ -98,11 +99,13 @@ class PurpleAirDataUpdateCoordinator(
         # we're adding a new one
         if self.get_sensor_count() >= self._domain_data.expected_entries_v1:
             self._domain_data.expected_entries_v1 = 0
-            self.hass.async_add_job(
-                self._async_refresh,
-                True,  # log_failures
-                False,  # raise_on_auth_failed
-                False,  # scheduled
+            self.hass.async_create_background_task(
+                self._async_refresh(
+                    True,  # log_failures
+                    False,  # raise_on_auth_failed
+                    False,  # scheduled
+                ),
+                "purpleair custom: coordinator._async_refresh",
             )
 
     def unregister_sensor(self, pa_sensor_id: str) -> None:
@@ -129,14 +132,17 @@ class PurpleAirDataUpdateCoordinator(
             raise UpdateFailed(str(err)) from err
 
         if [s["device"] for s in data.values() if s["device"]]:
-            self._last_device_refresh = datetime.utcnow()
+            self._last_device_refresh = dt_util.utcnow()
 
             devices: dict[str, DeviceReading] = {}
             for pa_sensor_id, api_data in data.items():
                 if device_data := api_data["device"]:
                     devices[pa_sensor_id] = device_data
 
-            self.hass.async_add_job(self._async_update_devices, devices)
+            self.hass.async_create_background_task(
+                self._async_update_devices(devices),
+                "purpleair custom: coordinator._async_update_devices",
+            )
 
         return data
 
@@ -147,7 +153,7 @@ class PurpleAirDataUpdateCoordinator(
         if not self._last_device_refresh:
             return True
 
-        diff = datetime.utcnow() - self._last_device_refresh
+        diff = dt_util.utcnow() - self._last_device_refresh
         return diff.days >= 1
 
     @property
@@ -172,7 +178,7 @@ class PurpleAirDataUpdateCoordinator(
 
             return None
 
-        registry = device_registry.async_get(self.hass)
+        registry = dr.async_get(self.hass)
 
         for pa_sensor_id, device_data in devices.items():
             config_entry = find_entry(pa_sensor_id)
